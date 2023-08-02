@@ -21,7 +21,11 @@ class BuilderProcess extends Process {
         }
         // Define creep once we know it's alive
         const creep = Game.creeps[this.data.creepName];
-        const target = creep.pos.findClosestByRange(FIND_CONSTRUCTION_SITES);
+        const target = creep.pos.findClosestByRange(FIND_CONSTRUCTION_SITES, {
+            filter: function(object){
+                return object.structureType === 'extension' || object.structureType === 'container'
+            }
+        });
         
         // Initialize Process into Memory
         if(!creep.memory.process){

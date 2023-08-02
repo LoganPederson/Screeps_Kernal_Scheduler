@@ -26,6 +26,7 @@ class HarvestProcess extends Process {
     const creep = Game.creeps[this.data.creepName]
     const spawn = creep.pos.findClosestByPath(FIND_MY_SPAWNS);
     const source = Game.getObjectById(this.data.sourceId)
+    const room = Game.creeps[this.data.creepName].room
     creep.memory.process = this.pid
 
     //
@@ -41,6 +42,11 @@ class HarvestProcess extends Process {
     //
     // If not full, harvest
     //  
+    let miner_drop_off = room.find(FIND_MY_STRUCTURES,{
+      filter: function (object){
+        return (object.structureType === 'spawn' || object.structureType === 'extension') && object.store.getFreeCapacity(RESOURCE_ENERGY) > 0
+      }
+    })
     if(creep.store[RESOURCE_ENERGY] < creep.store.getCapacity()) {
       //console.log(`creep ${creep.name} is not full, attempting to harvest from source: ${source}`)
       if (creep.harvest(source) === ERR_NOT_IN_RANGE) {
@@ -62,8 +68,8 @@ class HarvestProcess extends Process {
             creep.moveTo(creep.pos.findClosestByPath(arrayHolder));
             }
       }
-      else if(creep.transfer(spawn, RESOURCE_ENERGY) === ERR_NOT_IN_RANGE) {
-        creep.moveTo(spawn);
+      else if(creep.transfer(creep.pos.findClosestByPath(miner_drop_off), RESOURCE_ENERGY) === ERR_NOT_IN_RANGE) {
+        creep.moveTo(creep.pos.findClosestByPath(miner_drop_off));
       }
     }
       // Implement harvest process logic here

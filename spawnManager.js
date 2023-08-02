@@ -20,21 +20,14 @@ class SpawnManager{
                 // -- Spawn miner if none exist work/move/carry
                 //
                 if (!spawn.spawning && spawnQueue.length > 0) {
-                    console.log(room.find(FIND_MY_CREEPS, {
-                        filter: function(object){
-                            return object.role === 'miner'
-                        }
-                    }).length === 0 && !spawn.spawning)
-
-
 
                     if(room.energyAvailable >= 200 && room.find(FIND_MY_CREEPS, {
                         filter: function(object){
-                            return object.role === 'miner'
+                            return object.role === 'harvester'
                         }
                     }).length == 0 && !spawn.spawning){
-                        console.log('test2')
-                        spawn.spawnCreep([WORK,CARRY,MOVE], 'EmergencyMiner', {memory: {role: 'harvester'}})
+                        // Spawn Emergency Miner
+                        spawn.spawnCreep([WORK,CARRY,MOVE], 'EmergencyMiner', {memory: {role: 'miner'}})
                     }
 
                     // prioritize miners and mules
