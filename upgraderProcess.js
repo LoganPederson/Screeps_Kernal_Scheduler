@@ -33,13 +33,25 @@ class UpgraderProcess extends Process {
         if(!creep.memory.process){
             creep.memory.process = this.pid
         }
+
+
+        //
+        // Check RCL (room controller level) and if 0, claim room
+        //
+        if(controller.level === 0){
+            if(creep.claimController(controller) === ERR_NOT_IN_RANGE){
+                creep.moveTo(controller)
+            }
+        }
+
+
         // If energy, upgrade
         if(creep.room.controller) {
             if(!creep.room.memory.controller.upgraders.includes(creep.name)){
                 creep.room.memory.controller.upgraders.push(creep.name)
             }
             if(creep.store.getUsedCapacity(RESOURCE_ENERGY) > 0) {
-                if(creep.upgradeController(creep.room.controller) == ERR_NOT_IN_RANGE) {
+                if(creep.upgradeController(creep.room.controller) === ERR_NOT_IN_RANGE) {
                     creep.moveTo(creep.room.controller);
                 }
             }

@@ -15,9 +15,29 @@ class SpawnManager{
             const spawns = room.find(FIND_MY_SPAWNS);
 
             spawns.forEach((spawn) => {
+                //
+                // Recover Mode Check
+                // -- Spawn miner if none exist work/move/carry
+                //
                 if (!spawn.spawning && spawnQueue.length > 0) {
-                    
-                    // prioritize miners first
+                    console.log(room.find(FIND_MY_CREEPS, {
+                        filter: function(object){
+                            return object.role === 'miner'
+                        }
+                    }).length === 0 && !spawn.spawning)
+
+
+
+                    if(room.energyAvailable >= 200 && room.find(FIND_MY_CREEPS, {
+                        filter: function(object){
+                            return object.role === 'miner'
+                        }
+                    }).length == 0 && !spawn.spawning){
+                        console.log('test2')
+                        spawn.spawnCreep([WORK,CARRY,MOVE], 'EmergencyMiner', {memory: {role: 'harvester'}})
+                    }
+
+                    // prioritize miners and mules
                     let index = 0
                     for(let element in room.memory.spawnQueue){
                         if(room.memory.spawnQueue[element].memory.role === 'miner'){
@@ -36,7 +56,7 @@ class SpawnManager{
                         }
                         index++
                     }
-                    // spawn next in queue if top priorities met
+                    // spawn next in queue if top priorities met AND there exists a miner && mule
                     if(room.energyAvailable > 200){
                     const creepRequest = spawnQueue.shift();
                     this.spawnCreep(spawn, creepRequest);
