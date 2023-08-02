@@ -14,20 +14,29 @@ class MuleProcess extends Process {
         // Variables + Upgrade Info
         const room = Game.rooms[this.data.roomName];
         const spawn = room.find(FIND_MY_SPAWNS)[0]
+        const controller = room.controller
         const containers = room.find(FIND_STRUCTURES, {
-            filter: function(element){
-                return (element.structureType === 'container')
+            filter: function(object){
+                return (object.structureType === 'container')
             }
         })
         const containersWorthGetting = room.find(FIND_STRUCTURES, {
-            filter: function(element){
-                return (element.structureType === 'container' && element.store.getUsedCapacity(RESOURCE_ENERGY) > 0)
+            filter: function(object){
+                return (object.structureType === 'container' && object.store.getUsedCapacity(RESOURCE_ENERGY) > 0 && (object.structureType === 'container' && controller.pos.getRangeTo(object) > 6))
             }
         })
 
+        // dropoffs: spawn, extension, container within 5 of controller
         const droppOffs = room.find(FIND_STRUCTURES, {
-            filter: function(element){
-                return ((element.structureType === 'spawn' || element.structureType === 'extension') && element.store.getUsedCapacity(RESOURCE_ENERGY) < element.store.getCapacity(RESOURCE_ENERGY))
+            filter: function(object){
+                return ((object.structureType === 'spawn' || object.structureType === 'extension' || (object.structureType === 'container' && controller.pos.getRangeTo(object) < 6)) && object.store.getUsedCapacity(RESOURCE_ENERGY) < object.store.getCapacity(RESOURCE_ENERGY))
+            }
+        })
+
+        // pickups: containers less than 2 from a source
+        const pickups = room.find(FIND_STRUCTURES, {
+            filter: function(object){
+                return (object.structureType === 'container' && controller.pos.getRangeTo(object) > 6) || object.structureType === 'storage'
             }
         })
 
@@ -38,6 +47,7 @@ class MuleProcess extends Process {
         // Define creep once we know it's alive
         const creep = Game.creeps[this.data.creepName];
         const closestDropOff = creep.pos.findClosestByRange(droppOffs);
+        const closestPickup = creep.pos.findClosestByRange(pickups)
         const closestContainer = creep.pos.findClosestByRange(containers);
         const closestContainerWorthGetting = creep.pos.findClosestByRange(containersWorthGetting);
         
@@ -51,9 +61,9 @@ class MuleProcess extends Process {
                     creep.moveTo(closestDropOff);
                 }
             }
-            // Otherwise, withdraw from container
-            else if(closestContainer){
-                if(creep.withdraw(closestContainer, RESOURCE_ENERGY) === ERR_NOT_IN_RANGE) {
+            // If empty - pickup
+            else if(closestPickup){
+                if(creep.withdraw(closestPickup, RESOURCE_ENERGY) === ERR_NOT_IN_RANGE) {
                 creep.moveTo(closestContainerWorthGetting);
                 }
             }
