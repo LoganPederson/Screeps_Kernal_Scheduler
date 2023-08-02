@@ -68,7 +68,7 @@ class UpgraderProcess extends Process {
 
                 let distance_from_container = creep.pos.getRangeTo(closest_container)
                 console.log(distance_from_container)
-                if(distance_from_container < 10){
+                if(distance_from_container < 6){
                     if (creep.withdraw(closest_container, RESOURCE_ENERGY) === ERR_NOT_IN_RANGE){
                         creep.moveTo(closest_container)
                     }
